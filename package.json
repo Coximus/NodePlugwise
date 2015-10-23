@@ -1,0 +1,20 @@
+{
+    "name": "NodePlugwise",
+    "version": "1.0.0",
+    "author": "Paul Alcock <coximusmaximus@googlemail.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/coximus/nodeplugwise"
+    },
+    "dependencies": {
+        "serialport": "~2.0.0",
+        "bluebird": "x.x.x"
+    },
+    "devDependencies": {
+        "grunt": "~0.4",
+        "assert": "x.x.x",
+        "mocha": "x.x.x",
+        "grunt-mocha-test": "x.x.x"
+    },
+    "main": "index.js"
+}
