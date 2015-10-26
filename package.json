@@ -13,6 +13,7 @@
     "devDependencies": {
         "grunt": "~0.4",
         "assert": "x.x.x",
+        "sinon": "x.x.x",
         "mocha": "x.x.x",
         "grunt-mocha-test": "x.x.x"
     },

@@ -1,28 +1,32 @@
 var Serial = require('serialport'),
     Promise = require('bluebird');
 
-var Plugwise = {
-    getSerialPorts: function() {
-        var test = Serial.list;
-        var newTest = Promise.promisify(test);
-        var temp = null;
-        newTest().then(function(ports) {
-                // console.log(ports);
-                temp =  ports;
-            });
+var Plugwise = function() {
+    this.serialPort;
+    this.connected = false;
+};
 
-        return temp;
+Plugwise.prototype.connect = function(serialPort, callback) {
+    this.serialPort = new Serial.SerialPort(serialPort, {baudrate: 115200}, true, function(err) {
+        if(err !== undefined && err !== null) {
+            return callback(err)
+        }
 
-        Serial.list(function (err, ports) {
-          ports.forEach(function(port) {
-            console.log(port.comName);
-            console.log(port.pnpId);
-            console.log(port.manufacturer);
-          });
+        this.connected = true;
+        return callback(null, 'Connected');
+    }.bind(this));
+};
+
+Plugwise.prototype.getSerialPorts = function(callback) {
+    Serial.list(function (err, ports) {
+        if (!(err === undefined || err === null) || !Array.isArray(ports)) {
+            return callback([]);
+        }
+        var validPorts = ports.filter(function(port) {
+            return port.manufacturer && port.manufacturer === "FTDI";
         });
-    }
-}
-
-Plugwise.getSerialPorts();
+        return callback(validPorts);
+    });
+};
 
 module.exports = Plugwise;
