@@ -66,8 +66,14 @@ describe('Plugwise', function() {
 
     describe('Open serial port', function() {
 
-        xit('should call create new serial port connection using the correct serial parameters', function() {
+        it('should call create new serial port connection using the correct serial parameters', function() {
+            var mock = sinon.mock(Serialport),
+                plugwise = new Plugwise();
 
+            mock.expects('SerialPort').once().withArgs('some-port', {baudrate: 115200});
+            plugwise.connect('some-port', function(){});
+            mock.verify();
+            mock.restore();
         });
         
         it('should return an error if opening a connection to the serial port fails', function() {
