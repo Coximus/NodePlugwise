@@ -1,7 +1,8 @@
 var assert = require('assert'),
     sinon = require('sinon'),
     Plugwise = require('../index.js'),
-    Serialport = require('serialport');
+    Serialport = require('serialport'),
+    Buffer = require('../buffer');
 
 describe('Plugwise', function() {
 
@@ -9,6 +10,13 @@ describe('Plugwise', function() {
         if (Serialport.list.restore) {
             Serialport.list.restore();
         }
+    });
+
+    describe('Initialise', function() {
+        it('should create a buffer instance', function() {
+            var plugwise = new Plugwise();
+            assert(plugwise.buffer instanceof Buffer);
+        });
     });
 
     describe('List ports', function() {
@@ -111,6 +119,32 @@ describe('Plugwise', function() {
             plugwise.connect('port-name', function(){});
             assert(plugwise.connected);
             Serialport.SerialPort.restore();
+        });
+    });
+
+    describe('Receive messages', function() {
+        var util = require("util"),
+            EventEmitter = require("events").EventEmitter,
+            MockBuffer = function() {};
+
+        util.inherits(MockBuffer, EventEmitter);
+
+        it('should log the message to the console', function() {
+            var spy = sinon.spy(console, 'log'),
+                mockBuffer = new MockBuffer(),
+                plugwise;
+
+            sinon.stub(Buffer, 'getInstance', function() {return (mockBuffer)});
+            sinon.stub(Serialport, 'SerialPort').yields().returns({some: 'object'});
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port-name', function(){});
+            mockBuffer.emit('BUFFER-RECV-messages', 'hello'); 
+            
+            assert.equal(spy.firstCall.args[0], 'message received');
+            
+            Serialport.SerialPort.restore();
+            Buffer.getInstance.restore();
         });
     });
 });

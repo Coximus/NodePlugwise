@@ -34,7 +34,7 @@ var Buffer = function() {
 			}.bind(this));
 			this.buffer = this.buffer.substr(completedMessage[0].length);
 		}
-		this.emit('messages', messages);
+		this.emit('BUFFER-RECV-messages', messages);
 	}
 };
 
@@ -54,3 +54,4 @@ Buffer.prototype.addPatternStart = function(startPattern) {
 }
 
 module.exports = Buffer;
+module.exports.getInstance = function() { return new Buffer() };

@@ -1,9 +1,13 @@
 var Serial = require('serialport'),
-    Promise = require('bluebird');
+    Buffer = require('./buffer');
 
 var Plugwise = function() {
     this.serialPort;
     this.connected = false;
+    this.buffer = Buffer.getInstance();
+    this.buffer.on('BUFFER-RECV-messages', function(messages) {
+        console.log('message received');
+    });
 };
 
 Plugwise.prototype.connect = function(serialPort, callback) {

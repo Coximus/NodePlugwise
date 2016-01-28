@@ -4,8 +4,8 @@ var assert = require('assert'),
 
 describe('Buffer', function() {
     it('should return an array of messages when emmiting a messages event', function(next) {
-        var buffer = new Buffer();
-        buffer.on('messages', function(data) {
+        var buffer = Buffer.getInstance();
+        buffer.on('BUFFER-RECV-messages', function(data) {
             assert(Array.isArray(data));
             next();
         });
@@ -13,8 +13,8 @@ describe('Buffer', function() {
     });
 
     it('should default to using a new line character to delimit messages in the buffer', function(next) {
-        var buffer = new Buffer();
-        buffer.on('messages', function(data) {
+        var buffer = Buffer.getInstance();
+        buffer.on('BUFFER-RECV-messages', function(data) {
             assert.equal(data[0], 'first message');
             assert.equal(data[1], 'second message');
             next();
@@ -23,8 +23,8 @@ describe('Buffer', function() {
     });
 
     it('should not return an empty message if the input ends in the delimiter', function(next) {
-        var buffer = new Buffer();
-        buffer.on('messages', function(data) {
+        var buffer = Buffer.getInstance();
+        buffer.on('BUFFER-RECV-messages', function(data) {
             assert.equal(data.length, 2);
             next();
         });
@@ -32,8 +32,8 @@ describe('Buffer', function() {
     });
 
     it('should not return the last message if it did not end with the delimieter', function(next) {
-        var buffer = new Buffer();
-        buffer.on('messages', function(data) {
+        var buffer = Buffer.getInstance();
+        buffer.on('BUFFER-RECV-messages', function(data) {
             assert.equal(data.length, 2);
             next();
         });
@@ -41,9 +41,9 @@ describe('Buffer', function() {
     });
 
     it('should have stored any incomplete messages from previously processing', function(next) {
-        var buffer = new Buffer();
+        var buffer = Buffer.getInstance();
         var count = 0;
-        buffer.on('messages', function(data) {
+        buffer.on('BUFFER-RECV-messages', function(data) {
             if (count === 0) {
                 assert.equal(data.length, 2);
                 assert.equal(data[0], 'first message');
@@ -61,11 +61,11 @@ describe('Buffer', function() {
     });
 
     it('should support custom footers', function(next) {
-        var buffer = new Buffer(),
+        var buffer = Buffer.getInstance(),
             count = 0;
             
         buffer.setPatternEnd('~');
-        buffer.on('messages', function(data) {
+        buffer.on('BUFFER-RECV-messages', function(data) {
             if (count === 0) {
                 assert.equal(data.length, 2);
                 assert.equal(data[0], 'first message');
@@ -83,11 +83,11 @@ describe('Buffer', function() {
     });
 
     it('should support custom footer patterns', function(next) {
-        var buffer = new Buffer(),
+        var buffer = Buffer.getInstance(),
             count = 0;
             
         buffer.setPatternEnd('(?:~|,)');
-        buffer.on('messages', function(data) {
+        buffer.on('BUFFER-RECV-messages', function(data) {
             if (count === 0) {
                 assert.equal(data.length, 2);
                 assert.equal(data[0], 'first message');
@@ -105,11 +105,11 @@ describe('Buffer', function() {
     });
 
     it('should support custom headers', function(next) {
-        var buffer = new Buffer(),
+        var buffer = Buffer.getInstance(),
             count = 0;
             
         buffer.addPatternStart('~');
-        buffer.on('messages', function(data) {
+        buffer.on('BUFFER-RECV-messages', function(data) {
             if (count === 0) {
                 assert.equal(data.length, 2);
                 assert.equal(data[0], 'first message');
