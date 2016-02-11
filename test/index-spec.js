@@ -73,7 +73,6 @@ describe('Plugwise', function() {
     });
 
     describe('Open serial port', function() {
-
         it('should call create new serial port connection using the correct serial parameters', function() {
             var mock = sinon.mock(Serialport),
                 plugwise = new Plugwise();
@@ -103,7 +102,8 @@ describe('Plugwise', function() {
         });
 
         it('should store the returned value if there was no error connecting', function() {
-            sinon.stub(Serialport, 'SerialPort').yields().returns({some: 'object'});
+            var writeSpy = sinon.spy();
+            sinon.stub(Serialport, 'SerialPort').yields().returns({some: 'object', write: writeSpy});
             var spy = sinon.spy();
             var plugwise = new Plugwise();
             plugwise.connect('port-name', spy);
@@ -119,6 +119,34 @@ describe('Plugwise', function() {
             plugwise.connect('port-name', function(){});
             assert(plugwise.connected);
             Serialport.SerialPort.restore();
+        });
+    });
+
+    describe('Initialise Plugwise', function() {
+        it('should return an error if the serial port is not connected', function(done) {
+            var writeSpy = sinon.spy();
+            sinon.stub(Serialport, 'SerialPort').yields().returns({write: writeSpy});
+            var plugwise = new Plugwise();
+            plugwise.sendInitMessage(function(err, success){
+                assert.equal(writeSpy.callCount, 0);
+                assert(!success);
+                assert(err);
+                Serialport.SerialPort.restore();
+                done();
+            });
+        });
+
+        it('should send an initialisation message to the serial port', function(done) {
+            var writeSpy = sinon.spy();
+            sinon.stub(Serialport, 'SerialPort').yields().returns({write: writeSpy});
+            var plugwise = new Plugwise();
+            plugwise.connect('some-port', function(){});
+            plugwise.sendInitMessage(function(err, success){
+                assert.equal(writeSpy.callCount, 1);
+                assert.equal('\x05\x05\x03\x03\x30\x30\x30\x30\x30\x30\x30\x31\x30\x30\x43\x31', writeSpy.firstCall.args[0]);
+                Serialport.SerialPort.restore();
+                done();
+            });
         });
     });
 
@@ -139,9 +167,9 @@ describe('Plugwise', function() {
             
             plugwise = new Plugwise();
             plugwise.connect('port-name', function(){});
-            mockBuffer.emit('BUFFER-RECV-messages', 'hello'); 
+            mockBuffer.emit('BUFFER-RECV-messages', ['hello']); 
             
-            assert.equal(spy.firstCall.args[0], 'message received');
+            assert.equal(spy.firstCall.args[0], 'hello');
             
             Serialport.SerialPort.restore();
             Buffer.getInstance.restore();

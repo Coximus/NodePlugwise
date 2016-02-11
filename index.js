@@ -6,8 +6,18 @@ var Plugwise = function() {
     this.connected = false;
     this.buffer = Buffer.getInstance();
     this.buffer.on('BUFFER-RECV-messages', function(messages) {
-        console.log('message received');
+        messages.forEach(function(message) {
+            console.log(message);
+        });
     });
+};
+
+Plugwise.prototype.sendInitMessage = function(callback) {
+    if (!this.connected || !this.serialPort) {
+        return callback('You must connect to a serial port before calling init', false);
+    } 
+    this.serialPort.write('\x05\x05\x03\x03\x30\x30\x30\x30\x30\x30\x30\x31\x30\x30\x43\x31');
+    return callback(null, true);
 };
 
 Plugwise.prototype.connect = function(serialPort, callback) {
