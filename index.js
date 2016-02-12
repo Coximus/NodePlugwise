@@ -16,6 +16,10 @@ Plugwise.prototype.initialiseSerial = function() {
     this.write('\x05\x05\x03\x03\x30\x30\x30\x41\x42\x34\x33\x43\x0D\x0A');
 };
 
+Plugwise.prototype.recieveSerialData = function(data) {
+    this.buffer.store(data);
+};
+
 Plugwise.prototype.connect = function(serialPort, callback) {
     this.serialPort = new Serial.SerialPort(serialPort, {baudrate: 115200}, true, function(err) {
         if(err !== undefined && err !== null) {
@@ -27,9 +31,9 @@ Plugwise.prototype.connect = function(serialPort, callback) {
     }.bind(this));
     if (this.serialPort.on) {
         this.serialPort.on('open', this.initialiseSerial);
-        // this.serialPort.on('data', function(data) {
-        //     console.log(data);
-        // });
+        this.serialPort.on('data', function(data) {
+            this.recieveSerialData(data);
+        }.bind(this));
     }
 };
 
