@@ -12,6 +12,10 @@ var Plugwise = function() {
     });
 };
 
+Plugwise.prototype.initialiseSerial = function() {
+    this.write('\x05\x05\x03\x03\x30\x30\x30\x41\x42\x34\x33\x43\x0D\x0A');
+};
+
 Plugwise.prototype.connect = function(serialPort, callback) {
     this.serialPort = new Serial.SerialPort(serialPort, {baudrate: 115200}, true, function(err) {
         if(err !== undefined && err !== null) {
@@ -21,6 +25,12 @@ Plugwise.prototype.connect = function(serialPort, callback) {
         this.connected = true;
         return callback(null, 'Connected');
     }.bind(this));
+    if (this.serialPort.on) {
+        this.serialPort.on('open', this.initialiseSerial);
+        // this.serialPort.on('data', function(data) {
+        //     console.log(data);
+        // });
+    }
 };
 
 Plugwise.prototype.getSerialPorts = function(callback) {
@@ -34,5 +44,10 @@ Plugwise.prototype.getSerialPorts = function(callback) {
         return callback(validPorts);
     });
 };
+
+// var test = new Plugwise();
+// test.connect('/dev/ttyUSB1', function() {
+//     console.log('my connected');
+// });
 
 module.exports = Plugwise;
