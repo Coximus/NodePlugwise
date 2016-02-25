@@ -160,6 +160,20 @@ describe('Plugwise', function() {
         var MockBuffer = function() {};
         util.inherits(MockBuffer, EventEmitter);
 
+        it('should send messages recieved from the serial port to the buffer', function() {
+            var plugwise,
+                buffer = new Buffer();
+            
+            stubSerialPort();
+            sinon.spy(buffer, 'store');
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+            plugwise.connect('some-port', function() {});
+            plugwise.serialPort.emit('data', 'some data');
+
+            assert.equal(1, plugwise.buffer.store.callCount);
+        });
+
         it('should log the message to the console', function() {
             var spy = sinon.spy(console, 'log'),
                 mockBuffer = new MockBuffer(),
