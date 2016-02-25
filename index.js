@@ -10,6 +10,15 @@ var Plugwise = function() {
             console.log(message);
         });
     });
+    this.txMsg = null;
+    this.txQueue = [];
+};
+
+Plugwise.prototype.send = function(message) {
+    if (!this.txMsg) {
+        this.txMsg = message;
+        this.serialPort.write(message);    
+    }
 };
 
 Plugwise.prototype.initialiseSerial = function() {
