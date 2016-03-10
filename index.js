@@ -1,5 +1,6 @@
 var Serial = require('serialport'),
-    Buffer = require('./buffer');
+    Buffer = require('./buffer'),
+    BufferProcessor = require('./bufferProcessor');
 
 var Plugwise = function() {
     this.serialPort;
@@ -7,10 +8,14 @@ var Plugwise = function() {
     this.buffer = Buffer.getInstance();
     this.buffer.on('BUFFER-RECV-messages', function(messages) {
         messages.forEach(function(message) {
-            console.log(message);
-        });
-    });
+            this.processPlugwiseMessage(message);
+        }.bind(this));
+    }.bind(this));
 };
+
+Plugwise.prototype.processPlugwiseMessage = function(msg) {
+    console.log(msg);
+}
 
 Plugwise.prototype.initialiseSerial = function() {
     this.write('\x05\x05\x03\x03\x30\x30\x30\x41\x42\x34\x33\x43\x0D\x0A');
