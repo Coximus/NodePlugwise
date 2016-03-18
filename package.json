@@ -8,7 +8,8 @@
     },
     "dependencies": {
         "serialport": "~2.0.0",
-        "bluebird": "x.x.x"
+        "bluebird": "x.x.x",
+        "crc": "x.x.x"
     },
     "devDependencies": {
         "grunt": "~0.4",
