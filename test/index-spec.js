@@ -3,6 +3,7 @@ var assert = require('assert'),
     Plugwise = require('../index.js'),
     Serialport = require('serialport'),
     Buffer = require('../buffer'),
+    BufferProcessor = require('../bufferProcessor'),
     util = require("util"),
     EventEmitter = require("events").EventEmitter;
 
@@ -174,19 +175,19 @@ describe('Plugwise', function() {
             assert.equal(1, plugwise.buffer.store.callCount);
         });
 
-        it('should log the message to the console', function() {
-            var spy = sinon.spy(console, 'log'),
-                mockBuffer = new MockBuffer(),
+        it('should pass buffer data to the buffer processor', function() {
+            var mockBuffer = new MockBuffer(),
+                bufferProcessorSpy = sinon.spy(BufferProcessor, 'process'),
                 plugwise;
 
             sinon.stub(Buffer, 'getInstance', function() {return (mockBuffer)});
             stubSerialPort();
-            
+
             plugwise = new Plugwise();
             plugwise.connect('port-name', function(){});
             mockBuffer.emit('BUFFER-RECV-messages', ['hello']); 
             
-            assert.equal(spy.firstCall.args[0], 'hello');
+            assert.equal(bufferProcessorSpy.firstCall.args[0], 'hello');
         });
     });
 });
