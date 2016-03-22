@@ -14,7 +14,7 @@ var Plugwise = function() {
 };
 
 Plugwise.prototype.processPlugwiseMessage = function(msg) {
-    console.log(msg);
+    var plugwiseMsg = BufferProcessor.process(msg);
 }
 
 Plugwise.prototype.initialiseSerial = function() {

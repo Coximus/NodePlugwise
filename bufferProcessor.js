@@ -13,10 +13,17 @@ function crcValid(buffer) {
     return crc === calcualtedCRC;
 }
 
-module.exports = function(buffer) {
-    if (!bufferLengthValid(buffer) || !crcValid(buffer)) {
-        return;
-    }
+module.exports =
+{
+    process: function(buffer) {
+        if (!bufferLengthValid(buffer) || !crcValid(buffer)) {
+            return;
+        }
 
-    return new PlugwiseMessage();
+        var bufferCode = buffer.substring(0, 4);
+        var sequenceNo = buffer.substring(4, 8);
+        var parameters = buffer.substring(8, buffer.length-4);
+
+        return new PlugwiseMessage({'code': bufferCode, 'sequenceNo': sequenceNo, 'parameters': parameters});
+    }
 }
