@@ -11,10 +11,28 @@ var Plugwise = function() {
             this.processPlugwiseMessage(message);
         }.bind(this));
     }.bind(this));
+    
+    this.txMsg = null;
+    this.txQueue = [];
+};
+
+Plugwise.prototype.send = function(message) {
+    if (!this.txMsg) {
+        this.txMsg = message;
+        return this.serialPort.write(message);    
+    }
+    
+    this.txQueue.push(message);
 };
 
 Plugwise.prototype.processPlugwiseMessage = function(msg) {
     var plugwiseMsg = BufferProcessor.process(msg);
+    if (plugwiseMsg && plugwiseMsg.isAck()) {
+        this.txMsg = null;
+        if(this.txQueue.length > 0) {
+            this.send(this.txQueue.shift());
+        }
+    }
 }
 
 Plugwise.prototype.initialiseSerial = function() {

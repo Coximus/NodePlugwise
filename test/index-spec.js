@@ -190,4 +190,69 @@ describe('Plugwise', function() {
             assert.equal(bufferProcessorSpy.firstCall.args[0], 'hello');
         });
     });
+
+    describe('Send message', function() {
+        it('should queue a message and send it to the serial', function() {
+            var plugwise,
+                buffer = new Buffer(),
+                message = 'hello world';
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.send(message);
+
+            assert.equal(1, plugwise.serialPort.write.callCount);
+            assert.equal(
+                message,
+                plugwise.serialPort.write.firstCall.args[0]
+            );
+        });
+
+        it('should not send a second message if the first message has not been acknowldeged', function() {
+           var plugwise,
+                buffer = new Buffer(),
+                messages = ['message1', 'message2'];
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            messages.forEach(function(message) {
+                plugwise.send(message);            
+            });
+
+            assert.equal(1, plugwise.serialPort.write.callCount);
+            assert.equal(
+                messages[0],
+                plugwise.serialPort.write.firstCall.args[0]
+            );
+        });
+
+        it('should send the second message when the first message is acknowledged', function() {
+            var plugwise,
+                buffer = new Buffer(),
+                messages = ['message1', 'message2', 'message3'];
+
+                buffer.setPatternEnd("\r\n");
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            messages.forEach(function(message, index) {
+                plugwise.send(message);
+                buffer.store('0000000100C1FEED\r\n');
+            });
+
+            assert.equal(3, plugwise.serialPort.write.callCount);
+            messages.forEach(function(message, index) {
+                assert.equal(messages[index], plugwise.serialPort.write.getCall(index).args[0]);
+            });
+        });
+    });
 });
