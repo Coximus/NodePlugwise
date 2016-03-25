@@ -19,12 +19,20 @@ var Plugwise = function() {
 Plugwise.prototype.send = function(message) {
     if (!this.txMsg) {
         this.txMsg = message;
-        this.serialPort.write(message);    
+        return this.serialPort.write(message);    
     }
+    
+    this.txQueue.push(message);
 };
 
 Plugwise.prototype.processPlugwiseMessage = function(msg) {
     var plugwiseMsg = BufferProcessor.process(msg);
+    if (plugwiseMsg && plugwiseMsg.isAck()) {
+        this.txMsg = null;
+        if(this.txQueue.length > 0) {
+            this.send(this.txQueue.shift());
+        }
+    }
 }
 
 Plugwise.prototype.initialiseSerial = function() {

@@ -235,18 +235,24 @@ describe('Plugwise', function() {
         it('should send the second message when the first message is acknowledged', function() {
             var plugwise,
                 buffer = new Buffer(),
-                messages = ['message1', 'message2'];
+                messages = ['message1', 'message2', 'message3'];
+
+                buffer.setPatternEnd("\r\n");
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
             
             plugwise = new Plugwise();
             plugwise.connect('port', function(){});
-            messages.forEach(function(message) {
-                plugwise.send(message);            
+            messages.forEach(function(message, index) {
+                plugwise.send(message);
+                buffer.store('0000000100C1FEED\r\n');
             });
 
-            assert.equal(2, plugwise.serialPort.write.callCount);
+            assert.equal(3, plugwise.serialPort.write.callCount);
+            messages.forEach(function(message, index) {
+                assert.equal(messages[index], plugwise.serialPort.write.getCall(index).args[0]);
+            });
         });
     });
 });

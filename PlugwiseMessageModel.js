@@ -4,4 +4,8 @@ var PlugwiseMessageModel = function(message) {
 	this.parameters = message.parameters || null;
 };
 
+PlugwiseMessageModel.prototype.isAck = function() {
+	return this.code === "0000" && this.parameters === "00C1";
+};
+
 module.exports = PlugwiseMessageModel;
