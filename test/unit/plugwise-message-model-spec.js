@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    PlugwiseMessageModel = require('../PlugwiseMessageModel');
+    PlugwiseMessageModel = require('../../PlugwiseMessageModel');
 
 describe('Plugwise Message Model', function() {
     describe('isAck', function() {

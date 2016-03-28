@@ -1,6 +1,6 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    Buffer = require('../buffer.js');
+    Buffer = require('../../buffer.js');
 
 describe('Buffer', function() {
     it('should return an array of messages when emmiting a messages event', function(next) {

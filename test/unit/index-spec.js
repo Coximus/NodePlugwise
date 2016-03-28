@@ -1,9 +1,9 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    Plugwise = require('../index.js'),
+    Plugwise = require('../../index.js'),
     Serialport = require('serialport'),
-    Buffer = require('../buffer'),
-    BufferProcessor = require('../bufferProcessor'),
+    Buffer = require('../../buffer'),
+    BufferProcessor = require('../../bufferProcessor'),
     util = require("util"),
     EventEmitter = require("events").EventEmitter;
 
@@ -188,6 +188,16 @@ describe('Plugwise', function() {
             mockBuffer.emit('BUFFER-RECV-messages', ['hello']); 
             
             assert.equal(bufferProcessorSpy.firstCall.args[0], 'hello');
+        });
+
+        it('should add a CommandSequence to the communications buffer when reciving an Ack', function() {
+            // mock buffer
+            // stub serial port
+            // send message
+            // acknowledge message
+            // assert communcations buffer 
+            
+            assert.equal(1,2); 
         });
     });
 
