@@ -191,13 +191,88 @@ describe('Plugwise', function() {
         });
 
         it('should add a CommandSequence to the communications buffer when reciving an Ack', function() {
-            // mock buffer
-            // stub serial port
-            // send message
-            // acknowledge message
-            // assert communcations buffer 
+            var buffer = new Buffer();
+
+            buffer.setPatternEnd("\r\n");
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+
+            plugwise = new Plugwise();
+            plugwise.connect('port-name', function(){});
+            plugwise.send('message');
+
+            assert.equal('message', plugwise.txMsg);
+            buffer.store('0000000100C1FEED\r\n');
+            assert.equal(null, plugwise.txMsg);
             
-            assert.equal(1,2); 
+            assert.equal(1, plugwise.commandsInFlight.length);
+        });
+
+        it('should set the sequence number of a CommandSequence when recieving an Ack', function() {
+            var buffer = new Buffer();
+
+            buffer.setPatternEnd("\r\n");
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+
+            plugwise = new Plugwise();
+            plugwise.connect('port-name', function(){});
+            plugwise.send('message');
+
+            assert.equal('message', plugwise.txMsg);
+            buffer.store('0000000100C1FEED\r\n');
+            assert.equal(null, plugwise.txMsg);
+            
+            assert.equal('0001', plugwise.commandsInFlight[0].sequenceNumber);
+        });
+
+        it('should store incomming messages in the relevant command sequences', function() {
+            var buffer = new Buffer();
+
+            buffer.setPatternEnd("\r\n");
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+
+            plugwise = new Plugwise();
+            plugwise.connect('port-name', function(){});
+            plugwise.send('message');
+            plugwise.send('message2');
+
+            assert.equal('message', plugwise.txMsg);
+            buffer.store('0000000100C1FEED\r\n');
+
+            assert.equal('message2', plugwise.txMsg);
+            buffer.store('0000000200C1103F\r\n');
+            assert.equal(null, plugwise.txMsg);
+            
+            buffer.store('00110001000D6F000099558D0101480D6F0000768D955B48FF2A79\r\n');
+
+            assert.equal('0001', plugwise.commandsInFlight[0].sequenceNumber);
+            assert.equal('0002', plugwise.commandsInFlight[1].sequenceNumber);
+
+            assert.equal(1, plugwise.commandsInFlight[0].receptions.length);
+            assert.equal(0, plugwise.commandsInFlight[1].receptions.length);
+        });
+
+        it('should not store incomming messages if they do not have a relevant command sequences', function() {
+            var buffer = new Buffer();
+
+            buffer.setPatternEnd("\r\n");
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+
+            plugwise = new Plugwise();
+            plugwise.connect('port-name', function(){});
+            plugwise.send('message');
+            plugwise.send('message2');
+
+            buffer.store('0000000100C1FEED\r\n');
+            buffer.store('0000000200C1103F\r\n');
+            
+            buffer.store('00110003000D6F000099558D0101480D6F0000768D955B48FFFF6D\r\n');
+
+            assert.equal(0, plugwise.commandsInFlight[0].receptions.length);
+            assert.equal(0, plugwise.commandsInFlight[1].receptions.length);
         });
     });
 
