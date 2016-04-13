@@ -1,6 +1,15 @@
 var Serial = require('serialport'),
     Buffer = require('./buffer'),
-    BufferProcessor = require('./bufferProcessor');
+    BufferProcessor = require('./bufferProcessor'),
+    CommandSequence = require('./CommandSequence');
+
+var getCommandSequenceBySequenceNumber = function(commandSequences, sequenceNo) {
+    for(var i = 0; i < commandSequences.length; i++) {
+        if (commandSequences[i].sequenceNumber === sequenceNo) {
+            return commandSequences[i];
+        }
+    }
+}
 
 var Plugwise = function() {
     this.serialPort;
@@ -14,6 +23,7 @@ var Plugwise = function() {
     
     this.txMsg = null;
     this.txQueue = [];
+    this.commandsInFlight = [];
 };
 
 Plugwise.prototype.send = function(message) {
@@ -27,11 +37,24 @@ Plugwise.prototype.send = function(message) {
 
 Plugwise.prototype.processPlugwiseMessage = function(msg) {
     var plugwiseMsg = BufferProcessor.process(msg);
-    if (plugwiseMsg && plugwiseMsg.isAck()) {
+    var commandSequence;
+    if (!plugwiseMsg) {
+        return;
+    }
+
+    if (plugwiseMsg.isAck()) {
+        commandSequence = new CommandSequence(this.txMsg);
+        commandSequence.setSequenceNumber(plugwiseMsg.sequenceNo)
+        this.commandsInFlight.push(commandSequence);
         this.txMsg = null;
         if(this.txQueue.length > 0) {
             this.send(this.txQueue.shift());
         }
+        return;
+    }
+    var commandSequence = getCommandSequenceBySequenceNumber(this.commandsInFlight, plugwiseMsg.sequenceNo);
+    if (commandSequence) {
+        commandSequence.addReception(plugwiseMsg);
     }
 }
 

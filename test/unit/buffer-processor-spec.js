@@ -1,7 +1,7 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    BufferProcessor = require('../bufferProcessor.js'),
-    PlugwiseMessage = require('../PlugwiseMessageModel');
+    BufferProcessor = require('../../bufferProcessor.js'),
+    PlugwiseMessage = require('../../PlugwiseMessageModel');
 
 describe('Buffer Processor', function() {
     describe('The input is valid', function() {
