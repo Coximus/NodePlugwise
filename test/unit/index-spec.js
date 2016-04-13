@@ -271,6 +271,7 @@ describe('Plugwise', function() {
             
             buffer.store('00110003000D6F000099558D0101480D6F0000768D955B48FFFF6D\r\n');
 
+            assert.equal(2, plugwise.commandsInFlight.length);
             assert.equal(0, plugwise.commandsInFlight[0].receptions.length);
             assert.equal(0, plugwise.commandsInFlight[1].receptions.length);
         });
