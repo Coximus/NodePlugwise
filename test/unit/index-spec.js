@@ -5,7 +5,8 @@ var assert = require('assert'),
     Buffer = require('../../buffer'),
     BufferProcessor = require('../../bufferProcessor'),
     util = require("util"),
-    EventEmitter = require("events").EventEmitter;
+    EventEmitter = require("events").EventEmitter,
+    transmissionMessage = require('../../TransmissionMessageModel');
 
 describe('Plugwise', function() {
 
@@ -281,7 +282,7 @@ describe('Plugwise', function() {
         it('should queue a message and send it to the serial', function() {
             var plugwise,
                 buffer = new Buffer(),
-                message = 'hello world';
+                message = new transmissionMessage('hello world');
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
@@ -292,7 +293,7 @@ describe('Plugwise', function() {
 
             assert.equal(1, plugwise.serialPort.write.callCount);
             assert.equal(
-                message,
+                message.message,
                 plugwise.serialPort.write.firstCall.args[0]
             );
         });
@@ -300,7 +301,7 @@ describe('Plugwise', function() {
         it('should not send a second message if the first message has not been acknowldeged', function() {
            var plugwise,
                 buffer = new Buffer(),
-                messages = ['message1', 'message2'];
+                messages = [new transmissionMessage('message1'), new transmissionMessage('message2')];
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
@@ -313,7 +314,7 @@ describe('Plugwise', function() {
 
             assert.equal(1, plugwise.serialPort.write.callCount);
             assert.equal(
-                messages[0],
+                messages[0].message,
                 plugwise.serialPort.write.firstCall.args[0]
             );
         });
@@ -337,7 +338,7 @@ describe('Plugwise', function() {
 
             assert.equal(3, plugwise.serialPort.write.callCount);
             messages.forEach(function(message, index) {
-                assert.equal(messages[index], plugwise.serialPort.write.getCall(index).args[0]);
+                assert.equal(messages[index].message, plugwise.serialPort.write.getCall(index).args[0]);
             });
         });
     });
