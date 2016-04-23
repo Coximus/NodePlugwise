@@ -29,7 +29,7 @@ var Plugwise = function() {
 Plugwise.prototype.send = function(message) {
     if (!this.txMsg) {
         this.txMsg = message;
-        return this.serialPort.write(message);    
+        return this.serialPort.write(message.message);
     }
     
     this.txQueue.push(message);
