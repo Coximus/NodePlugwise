@@ -282,7 +282,7 @@ describe('Plugwise', function() {
         it('should queue a message and send it to the serial', function() {
             var plugwise,
                 buffer = new Buffer(),
-                message = new transmissionMessage('hello world');
+                message = new transmissionMessage({message: 'hello world'});
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
@@ -292,6 +292,8 @@ describe('Plugwise', function() {
             plugwise.send(message);
 
             assert.equal(1, plugwise.serialPort.write.callCount);
+            console.log(message.message,
+                plugwise.serialPort.write.firstCall.args[0]);
             assert.equal(
                 message.message,
                 plugwise.serialPort.write.firstCall.args[0]
@@ -301,7 +303,10 @@ describe('Plugwise', function() {
         it('should not send a second message if the first message has not been acknowldeged', function() {
            var plugwise,
                 buffer = new Buffer(),
-                messages = [new transmissionMessage('message1'), new transmissionMessage('message2')];
+                messages = [
+                    new transmissionMessage({message: 'message1'}),
+                    new transmissionMessage({message: 'message2'})
+                ];
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
