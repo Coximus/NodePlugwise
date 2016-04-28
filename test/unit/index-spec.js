@@ -6,7 +6,8 @@ var assert = require('assert'),
     BufferProcessor = require('../../bufferProcessor'),
     util = require("util"),
     EventEmitter = require("events").EventEmitter,
-    transmissionMessage = require('../../TransmissionMessageModel');
+    transmissionMessage = require('../../TransmissionMessageModel'),
+    CommandSequenceProcessor = require('../../CommandSequenceProcessor');
 
 describe('Plugwise', function() {
 
@@ -40,6 +41,9 @@ describe('Plugwise', function() {
         if (Buffer.getInstance.restore) {
             Buffer.getInstance.restore();
         }
+        if (CommandSequenceProcessor.Process.restore) {
+            CommandSequenceProcessor.Process.restore();
+        };
     });
 
     describe('Initialise', function() {
@@ -275,6 +279,24 @@ describe('Plugwise', function() {
             assert.equal(2, plugwise.commandsInFlight.length);
             assert.equal(0, plugwise.commandsInFlight[0].receptions.length);
             assert.equal(0, plugwise.commandsInFlight[1].receptions.length);
+        });
+
+        it('should pass the command sequence to the CommandSequenceProcessor', function() {
+            var buffer = new Buffer(),
+                processSpy = sinon.spy(CommandSequenceProcessor, 'Process');
+
+            buffer.setPatternEnd("\r\n");
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+
+            plugwise = new Plugwise();
+            plugwise.connect('port-name', function(){});
+            plugwise.send('message');
+
+            buffer.store('0000000100C1FEED\r\n');
+            buffer.store('00110001000D6F000099558D0101480D6F0000768D955B48FF2A79\r\n');
+
+            assert.equal(1, processSpy.callCount);
         });
     });
 
