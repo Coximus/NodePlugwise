@@ -7,7 +7,7 @@ var assert = require('assert'),
     util = require("util"),
     EventEmitter = require("events").EventEmitter,
     transmissionMessage = require('../../TransmissionMessageModel'),
-    CommandSequenceProcessor = require('../../CommandSequenceProcessor');
+    CommandSequenceProcessor = require('../../commandSequenceProcessor');
 
 describe('Plugwise', function() {
 
@@ -50,6 +50,26 @@ describe('Plugwise', function() {
         it('should create a buffer instance', function() {
             var plugwise = new Plugwise();
             assert(plugwise.buffer instanceof Buffer);
+        });
+
+        it('should set the buffer start match', function() {
+            var plugwise,
+                buffer = new Buffer(),
+                spy = sinon.spy(buffer, 'addPatternStart');
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+            assert.equal('\x05\x05\x03\x03', spy.firstCall.args[0]);
+        });
+
+        it('should set the buffer end match', function() {
+            var plugwise,
+                buffer = new Buffer(),
+                spy = sinon.spy(buffer, 'setPatternEnd');
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+            assert.equal('(?:\x0D\x0A\x83|\x0D\x0A)', spy.firstCall.args[0]);
         });
 
         it('should send the initialise message to the serial port', function(done) {
@@ -181,24 +201,23 @@ describe('Plugwise', function() {
         });
 
         it('should pass buffer data to the buffer processor', function() {
-            var mockBuffer = new MockBuffer(),
+            var buffer = new Buffer(),
                 bufferProcessorSpy = sinon.spy(BufferProcessor, 'process'),
                 plugwise;
 
-            sinon.stub(Buffer, 'getInstance', function() {return (mockBuffer)});
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
 
             plugwise = new Plugwise();
             plugwise.connect('port-name', function(){});
-            mockBuffer.emit('BUFFER-RECV-messages', ['hello']); 
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
             
-            assert.equal(bufferProcessorSpy.firstCall.args[0], 'hello');
+            assert.equal(bufferProcessorSpy.firstCall.args[0], '0000000100C1FEED');
         });
 
         it('should add a CommandSequence to the communications buffer when reciving an Ack', function() {
             var buffer = new Buffer();
 
-            buffer.setPatternEnd("\r\n");
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
 
@@ -207,7 +226,7 @@ describe('Plugwise', function() {
             plugwise.send('message');
 
             assert.equal('message', plugwise.txMsg);
-            buffer.store('0000000100C1FEED\r\n');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A\x83');
             assert.equal(null, plugwise.txMsg);
             
             assert.equal(1, plugwise.commandsInFlight.length);
@@ -216,7 +235,6 @@ describe('Plugwise', function() {
         it('should set the sequence number of a CommandSequence when recieving an Ack', function() {
             var buffer = new Buffer();
 
-            buffer.setPatternEnd("\r\n");
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
 
@@ -225,7 +243,7 @@ describe('Plugwise', function() {
             plugwise.send('message');
 
             assert.equal('message', plugwise.txMsg);
-            buffer.store('0000000100C1FEED\r\n');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
             assert.equal(null, plugwise.txMsg);
             
             assert.equal('0001', plugwise.commandsInFlight[0].sequenceNumber);
@@ -234,7 +252,6 @@ describe('Plugwise', function() {
         it('should store incomming messages in the relevant command sequences', function() {
             var buffer = new Buffer();
 
-            buffer.setPatternEnd("\r\n");
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
 
@@ -244,13 +261,13 @@ describe('Plugwise', function() {
             plugwise.send('message2');
 
             assert.equal('message', plugwise.txMsg);
-            buffer.store('0000000100C1FEED\r\n');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
 
             assert.equal('message2', plugwise.txMsg);
-            buffer.store('0000000200C1103F\r\n');
+            buffer.store('\x05\x05\x03\x030000000200C1103F\x0D\x0A');
             assert.equal(null, plugwise.txMsg);
             
-            buffer.store('00110001000D6F000099558D0101480D6F0000768D955B48FF2A79\r\n');
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
 
             assert.equal('0001', plugwise.commandsInFlight[0].sequenceNumber);
             assert.equal('0002', plugwise.commandsInFlight[1].sequenceNumber);
@@ -262,7 +279,6 @@ describe('Plugwise', function() {
         it('should not store incomming messages if they do not have a relevant command sequences', function() {
             var buffer = new Buffer();
 
-            buffer.setPatternEnd("\r\n");
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
 
@@ -271,10 +287,9 @@ describe('Plugwise', function() {
             plugwise.send('message');
             plugwise.send('message2');
 
-            buffer.store('0000000100C1FEED\r\n');
-            buffer.store('0000000200C1103F\r\n');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A\x05\x05\x03\x030000000200C1103F\x0D\x0A');
             
-            buffer.store('00110003000D6F000099558D0101480D6F0000768D955B48FFFF6D\r\n');
+            buffer.store('\x05\x05\x03\x0300110003000D6F000099558D0101480D6F0000768D955B48FFFF6D\x0D\x0A');
 
             assert.equal(2, plugwise.commandsInFlight.length);
             assert.equal(0, plugwise.commandsInFlight[0].receptions.length);
@@ -285,7 +300,6 @@ describe('Plugwise', function() {
             var buffer = new Buffer(),
                 processSpy = sinon.spy(CommandSequenceProcessor, 'Process');
 
-            buffer.setPatternEnd("\r\n");
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
 
@@ -293,8 +307,8 @@ describe('Plugwise', function() {
             plugwise.connect('port-name', function(){});
             plugwise.send('message');
 
-            buffer.store('0000000100C1FEED\r\n');
-            buffer.store('00110001000D6F000099558D0101480D6F0000768D955B48FF2A79\r\n');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
 
             assert.equal(1, processSpy.callCount);
         });
@@ -349,7 +363,6 @@ describe('Plugwise', function() {
                 buffer = new Buffer(),
                 messages = ['message1', 'message2', 'message3'];
 
-                buffer.setPatternEnd("\r\n");
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
@@ -358,7 +371,7 @@ describe('Plugwise', function() {
             plugwise.connect('port', function(){});
             messages.forEach(function(message, index) {
                 plugwise.send(message);
-                buffer.store('0000000100C1FEED\r\n');
+                buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
             });
 
             assert.equal(3, plugwise.serialPort.write.callCount);

@@ -18,7 +18,7 @@ var Buffer = function() {
 		}
 
 		if (this.bufferStart.length > 0) {			
-			bufferMatch = new RegExp("(?:[" + this.bufferStart.join('|') + "])(.*)");
+			bufferMatch = new RegExp("(?:" + this.bufferStart.join('|') + ")(.*)");
 		}
 		
 		completedMessage = this.buffer.match(bufferEnd);

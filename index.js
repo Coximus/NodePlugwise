@@ -2,7 +2,7 @@ var Serial = require('serialport'),
     Buffer = require('./buffer'),
     BufferProcessor = require('./bufferProcessor'),
     CommandSequence = require('./CommandSequence'),
-    CommandSequenceProcessor = require('./CommandSequenceProcessor');
+    CommandSequenceProcessor = require('./commandSequenceProcessor');
 
 var getCommandSequenceBySequenceNumber = function(commandSequences, sequenceNo) {
     for(var i = 0; i < commandSequences.length; i++) {
@@ -16,6 +16,8 @@ var Plugwise = function() {
     this.serialPort;
     this.connected = false;
     this.buffer = Buffer.getInstance();
+    this.buffer.addPatternStart('\x05\x05\x03\x03');
+    this.buffer.setPatternEnd('(?:\x0D\x0A\x83|\x0D\x0A)');
     this.buffer.on('BUFFER-RECV-messages', function(messages) {
         messages.forEach(function(message) {
             this.processPlugwiseMessage(message);
