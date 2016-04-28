@@ -9,15 +9,34 @@ describe('Plugwise Message Model', function() {
             assert(message.isAck());
         });
 
-        it('should return false if code and parameters signify it is an ACK', function() {
+        it('should return false if code and parameters signify it is not an ACK', function() {
             var messages = [
-                {code: "0000", sequenceNo: "0001", parameters: "00E1"},
-                {code: "0001", sequenceNo: "0001", parameters: "00C1"}
+                {code: "0000", sequenceNo: "0001", parameters: "00E1"}, // correct code but not parameter
+                {code: "0001", sequenceNo: "0001", parameters: "00C1"} // correct paramter but not code
             ];
 
             messages.forEach(function(message) {
                 var msg = new PlugwiseMessageModel(message);
                 assert.equal(false, msg.isAck());
+            });
+        });
+    });
+
+    describe('isNAck', function() {
+        it('should return true if code and parameters signify it is a NACK', function() {
+            var message = new PlugwiseMessageModel({code: "0000", sequenceNo: "0001", parameters: "00E1"});
+            assert(message.isNAck());
+        });
+
+        it('should return false if code and parameters signify it is not a NACK', function() {
+            var messages = [
+                {code: "0000", sequenceNo: "0001", parameters: "00C1"}, // correct code but not parameter
+                {code: "0001", sequenceNo: "0001", parameters: "00E1"} // correct paramter but not code
+            ];
+
+            messages.forEach(function(message) {
+                var msg = new PlugwiseMessageModel(message);
+                assert.equal(false, msg.isNAck());
             });
         });
     });
