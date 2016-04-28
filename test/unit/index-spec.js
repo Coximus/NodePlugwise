@@ -292,8 +292,6 @@ describe('Plugwise', function() {
             plugwise.send(message);
 
             assert.equal(1, plugwise.serialPort.write.callCount);
-            console.log(message.message,
-                plugwise.serialPort.write.firstCall.args[0]);
             assert.equal(
                 message.message,
                 plugwise.serialPort.write.firstCall.args[0]

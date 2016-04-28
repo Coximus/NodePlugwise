@@ -2,6 +2,13 @@ var assert = require('assert'),
     MessageModel = require('../../TransmissionMessageModel');
 
 describe('Transmission Message Model', function() {
+    it('should store the type passed through the constructor', function() {
+        var type = 0,
+            message = new MessageModel({type: type});
+
+        assert.equal(type, message.type);
+    });
+
     it('should store the message passed through the constructor', function() {
         var msg = "Hello World",
             message = new MessageModel({message: msg});
@@ -26,6 +33,8 @@ describe('Transmission Message Model', function() {
     it('should default to null for the message, onSuccess and onError properties', function() {
         var message = new MessageModel({});
 
+        assert.deepEqual(null, message.type);
+        assert.notDeepEqual(undefined, message.type);
         assert.deepEqual(null, message.message);
         assert.notDeepEqual(undefined, message.message);
         assert.deepEqual(null, message.onSuccess);
