@@ -2,7 +2,8 @@ var Serial = require('serialport'),
     Buffer = require('./buffer'),
     BufferProcessor = require('./bufferProcessor'),
     CommandSequence = require('./CommandSequence'),
-    CommandSequenceProcessor = require('./commandSequenceProcessor');
+    CommandSequenceProcessor = require('./commandSequenceProcessor'),
+    TransmissionMessages = require('./PlugwiseTxMessages/TransmissionMessages');
 
 var getCommandSequenceBySequenceNumber = function(commandSequences, sequenceNo) {
     for(var i = 0; i < commandSequences.length; i++) {
@@ -63,7 +64,12 @@ Plugwise.prototype.processPlugwiseMessage = function(msg) {
 }
 
 Plugwise.prototype.initialiseSerial = function() {
-    this.write('\x05\x05\x03\x03\x30\x30\x30\x41\x42\x34\x33\x43\x0D\x0A');
+    this.send(new TransmissionMessages.Initialise(function(error, messages) {
+        if (error) {
+            console.error(error);
+        }
+        console.log(messages);
+    }));
 };
 
 Plugwise.prototype.recieveSerialData = function(data) {
@@ -80,7 +86,7 @@ Plugwise.prototype.connect = function(serialPort, callback) {
         return callback(null, 'Connected');
     }.bind(this));
     if (this.serialPort.on) {
-        this.serialPort.on('open', this.initialiseSerial);
+        this.serialPort.on('open', this.initialiseSerial.bind(this));
         this.serialPort.on('data', function(data) {
             this.recieveSerialData(data);
         }.bind(this));
@@ -99,9 +105,9 @@ Plugwise.prototype.getSerialPorts = function(callback) {
     });
 };
 
-// var test = new Plugwise();
-// test.connect('/dev/ttyUSB1', function() {
-//     console.log('my connected');
-// });
+var test = new Plugwise();
+test.connect('/dev/ttyUSB0', function() {
+    console.log('my connected');
+});
 
 module.exports = Plugwise;

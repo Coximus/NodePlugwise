@@ -1,8 +1,23 @@
-var MessageModel = function(msg) {
-	this.type = msg.type === 0 ? 0 : msg.type  || null;
-	this.message = msg.message || null;
-	this.onSuccess = msg.onSuccess || null;
-	this.onError = msg.onError || null;
+var CRC = require('crc');
+
+function pad(input, size) {
+    var s = input+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+
+var MessageModel = function(message, callback) {
+    var msg = message.message || "",
+        header = "\x05\x05\x03\x03",
+        footer = "\x0D\x0A",
+        crc = pad(CRC.crc16xmodem(msg).toString(16).toUpperCase(), 4);
+
+    return {
+        type: message.type === 0 ? 0 : message.type  || null,
+        message: header + msg + crc  + footer,
+        callback: callback || null,
+    }
+	
 }
 
 module.exports = MessageModel;

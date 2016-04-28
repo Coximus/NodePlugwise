@@ -1,5 +1,6 @@
 var typeResonseCountMap = {
-    0: 2
+    0: 1,
+    1: 2
 };
 
 var NAckReceived = function(receptions) {
@@ -16,13 +17,13 @@ module.exports = {
     Process: function(commandSequence) {
         var receptions = commandSequence.receptions;
         if (NAckReceived(commandSequence.receptions)) {
-            return commandSequence.transmission.onError();
+            return commandSequence.transmission.callback("NACK receieved");
         }
         if (receptions.length === typeResonseCountMap[commandSequence.transmission.type]) {
-            return commandSequence.transmission.onSuccess();
+            return commandSequence.transmission.callback(null, ""); //TODO - make sure we pass the messages
         }
         if (receptions.length > typeResonseCountMap[commandSequence.transmission.type]) {
-            return commandSequence.transmission.onError();
+            return commandSequence.transmission.callback("Too many messages were received");
         }
     }
 }
