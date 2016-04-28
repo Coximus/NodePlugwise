@@ -1,7 +1,8 @@
 var Serial = require('serialport'),
     Buffer = require('./buffer'),
     BufferProcessor = require('./bufferProcessor'),
-    CommandSequence = require('./CommandSequence');
+    CommandSequence = require('./CommandSequence'),
+    CommandSequenceProcessor = require('./CommandSequenceProcessor');
 
 var getCommandSequenceBySequenceNumber = function(commandSequences, sequenceNo) {
     for(var i = 0; i < commandSequences.length; i++) {
@@ -55,6 +56,7 @@ Plugwise.prototype.processPlugwiseMessage = function(msg) {
     var commandSequence = getCommandSequenceBySequenceNumber(this.commandsInFlight, plugwiseMsg.sequenceNo);
     if (commandSequence) {
         commandSequence.addReception(plugwiseMsg);
+        CommandSequenceProcessor.Process(commandSequence);
     }
 }
 
