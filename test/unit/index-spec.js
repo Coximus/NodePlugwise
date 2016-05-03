@@ -84,6 +84,40 @@ describe('Plugwise', function() {
             );
             done();
         });
+
+        it('should store the network address from the initialise response', function(done) {
+            var plugwise,
+                buffer = new Buffer();
+
+            stubSerialPort();
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+
+            plugwise.connect('some-port', function() {});
+            plugwise.serialPort.emit('open');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
+
+            assert.equal('000D6F0000', plugwise.networkAddress);
+            done();
+        });
+
+        it('should store the stick address from the initialise response', function(done) {
+            var plugwise,
+                buffer = new Buffer();
+
+            stubSerialPort();
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+
+            plugwise.connect('some-port', function() {});
+            plugwise.serialPort.emit('open');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
+
+            assert.equal('99558D', plugwise.stickAddress);
+            done();
+        });
     });
 
     describe('List ports', function() {
@@ -182,9 +216,6 @@ describe('Plugwise', function() {
     });
 
     describe('Receive messages', function() {
-        
-        var MockBuffer = function() {};
-        util.inherits(MockBuffer, EventEmitter);
 
         it('should send messages recieved from the serial port to the buffer', function() {
             var plugwise,

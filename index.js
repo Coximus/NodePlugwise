@@ -16,6 +16,7 @@ var getCommandSequenceBySequenceNumber = function(commandSequences, sequenceNo) 
 var Plugwise = function() {
     this.serialPort;
     this.connected = false;
+    this.networkAddress;
     this.buffer = Buffer.getInstance();
     this.buffer.addPatternStart('\x05\x05\x03\x03');
     this.buffer.setPatternEnd('(?:\x0D\x0A\x83|\x0D\x0A)');
@@ -64,12 +65,12 @@ Plugwise.prototype.processPlugwiseMessage = function(msg) {
 }
 
 Plugwise.prototype.initialiseSerial = function() {
-    this.send(new TransmissionMessages.Initialise(function(error, messages) {
+    this.send(new TransmissionMessages.Initialise(function(error, networkData) {
         if (error) {
             console.error(error);
         }
-        console.log(messages);
-    }));
+        this.networkAddress = networkData.network;
+    }.bind(this)));
 };
 
 Plugwise.prototype.recieveSerialData = function(data) {
@@ -105,9 +106,9 @@ Plugwise.prototype.getSerialPorts = function(callback) {
     });
 };
 
-var test = new Plugwise();
-test.connect('/dev/ttyUSB0', function() {
-    console.log('my connected');
-});
+// var test = new Plugwise();
+// test.connect('/dev/ttyUSB0', function() {
+//     console.log('my connected');
+// });
 
 module.exports = Plugwise;

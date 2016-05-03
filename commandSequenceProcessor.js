@@ -20,7 +20,7 @@ module.exports = {
             return commandSequence.transmission.callback("NACK receieved");
         }
         if (receptions.length === typeResonseCountMap[commandSequence.transmission.type]) {
-            return commandSequence.transmission.callback(null, ""); //TODO - make sure we pass the messages
+            return commandSequence.transmission.callback(null, commandSequence.receptions);
         }
         if (receptions.length > typeResonseCountMap[commandSequence.transmission.type]) {
             return commandSequence.transmission.callback("Too many messages were received");

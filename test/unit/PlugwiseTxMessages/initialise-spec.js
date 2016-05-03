@@ -128,4 +128,39 @@ describe('PlugwiseTxMessage - Initialise', function() {
             }];
         }
     });
+
+    describe('Errors', function() {
+        it('should pass through an error if one was present when calling process', function(done) {
+            var errorMessage = 'There was an error',
+                receptions = [new PlugwiseMessage({code: '0011', parameters: '000D6F000099558D0101480D6F0000768D955B48FF'})],
+                msg = new InitialiseMsg(function(error, networkData) {
+                    assert.equal(errorMessage, error);
+                    done();
+                });
+
+            msg.callback(errorMessage, receptions);
+        });
+
+        it('should pass through an error if no initialisation response was present', function(done) {
+            var errorMessage = 'No valid Initialisation Response found.',
+                receptions = [new PlugwiseMessage({code: 'incorrect-code', parameters: '000D6F000099558D0101480D6F0000768D955B48FF'})],
+                msg = new InitialiseMsg(function(error, networkData) {
+                    assert.equal(errorMessage, error);
+                    done();
+                });
+
+            msg.callback(null, receptions);
+        });
+
+        it('should pass through an error if no initialisation response was present with a parameter length of 42', function(done) {
+            var errorMessage = 'No valid Initialisation Response found.',
+                receptions = [new PlugwiseMessage({code: '0011', parameters: 'incorrect-parameter-length'})],
+                msg = new InitialiseMsg(function(error, networkData) {
+                    assert.equal(errorMessage, error);
+                    done();
+                });
+
+            msg.callback(null, receptions);
+        });
+    });
 });
