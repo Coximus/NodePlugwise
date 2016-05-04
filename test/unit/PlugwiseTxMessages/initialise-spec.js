@@ -75,10 +75,10 @@ describe('PlugwiseTxMessage - Initialise', function() {
                             new PlugwiseMessage({code: '0011', parameters: fixture.rawMessage})
                         ],
                         msg = new InitialiseMsg(function(error, networkData) {
-                            if (error) {
-                                console.log('rejecting');
-                                reject('error');
-                            }
+                            // if (error) {
+                            //     console.log('rejecting');
+                            //     reject('error');
+                            // }
                             resolve(networkData);
                         });
 
