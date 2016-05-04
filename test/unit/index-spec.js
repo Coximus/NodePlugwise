@@ -7,7 +7,9 @@ var assert = require('assert'),
     util = require("util"),
     EventEmitter = require("events").EventEmitter,
     transmissionMessage = require('../../TransmissionMessageModel'),
-    CommandSequenceProcessor = require('../../commandSequenceProcessor');
+    CommandSequenceProcessor = require('../../commandSequenceProcessor'),
+    PlugwiseMessageStringHelper = require('../helpers/generate-plugwise-message-string'),
+    PlugwiseAckMessageStringHelper = require('../helpers/generate-plugwise-ack-string');
 
 describe('Plugwise', function() {
 
@@ -82,6 +84,58 @@ describe('Plugwise', function() {
                 '\x05\x05\x03\x03\x30\x30\x30\x41\x42\x34\x33\x43\x0D\x0A',
                 plugwise.serialPort.write.firstCall.args[0]
             );
+            done();
+        });
+
+        it('should store the network address from the initialise response', function(done) {
+            var plugwise,
+                buffer = new Buffer();
+
+            stubSerialPort();
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+
+            plugwise.connect('some-port', function() {});
+            plugwise.serialPort.emit('open');
+
+            buffer.store(PlugwiseAckMessageStringHelper());
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
+
+            assert.equal('000D6F0000', plugwise.networkAddress);
+            done();
+        });
+
+        it('should store the stick address from the initialise response', function(done) {
+            var plugwise,
+                buffer = new Buffer();
+
+            stubSerialPort();
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+
+            plugwise.connect('some-port', function() {});
+            plugwise.serialPort.emit('open');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
+
+            assert.equal('99558D', plugwise.stickAddress);
+            done();
+        });
+
+        it('should store the circlePlus address from the initialise response', function(done) {
+            var plugwise,
+                buffer = new Buffer();
+
+            stubSerialPort();
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+
+            plugwise.connect('some-port', function() {});
+            plugwise.serialPort.emit('open');
+            buffer.store('\x05\x05\x03\x030000000100C1FEED\x0D\x0A');
+            buffer.store('\x05\x05\x03\x0300110001000D6F000099558D0101480D6F0000768D955B48FF2A79\x0D\x0A');
+
+            assert.equal('768D95', plugwise.circlePlusAddress);
             done();
         });
     });
@@ -182,9 +236,6 @@ describe('Plugwise', function() {
     });
 
     describe('Receive messages', function() {
-        
-        var MockBuffer = function() {};
-        util.inherits(MockBuffer, EventEmitter);
 
         it('should send messages recieved from the serial port to the buffer', function() {
             var plugwise,
