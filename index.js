@@ -17,6 +17,8 @@ var Plugwise = function() {
     this.serialPort;
     this.connected = false;
     this.networkAddress;
+    this.stickAddress;
+    this.circlePlusAddress;
     this.buffer = Buffer.getInstance();
     this.buffer.addPatternStart('\x05\x05\x03\x03');
     this.buffer.setPatternEnd('(?:\x0D\x0A\x83|\x0D\x0A)');
@@ -70,6 +72,8 @@ Plugwise.prototype.initialiseSerial = function() {
             console.error(error);
         }
         this.networkAddress = networkData.network;
+        this.stickAddress = networkData.stick;
+        this.circlePlusAddress = networkData.circlePlus;
     }.bind(this)));
 };
 
