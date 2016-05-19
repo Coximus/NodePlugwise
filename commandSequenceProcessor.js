@@ -15,6 +15,9 @@ var NAckReceived = function(receptions) {
 
 module.exports = {
     Process: function(commandSequence) {
+        if (!commandSequence.transmission.callback){
+            return;
+        }
         var receptions = commandSequence.receptions;
         if (NAckReceived(commandSequence.receptions)) {
             return commandSequence.transmission.callback("NACK receieved");
