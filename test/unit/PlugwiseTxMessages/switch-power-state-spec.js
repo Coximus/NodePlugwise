@@ -60,5 +60,17 @@ describe('PlugwiseTxMessage - SwitchPowerState', function() {
 
             assert.deepEqual(1, msg.type);
         });
+
+        it('should create the correct message for switching a plug on', function() {
+            var msg = new SwitchPowerStateMsg("0123456789ABCDEF", 0);
+
+            assert.deepEqual("\x05\x05\x03\x0300170123456789ABCDEF00601B\x0D\x0A", msg.message);
+        });
+
+        it('should create the correct message for switching a plug on', function() {
+            var msg = new SwitchPowerStateMsg("0123456789ABCDEF", 1);
+
+            assert.deepEqual("\x05\x05\x03\x0300170123456789ABCDEF01703A\x0D\x0A", msg.message);
+        });
     });
 });

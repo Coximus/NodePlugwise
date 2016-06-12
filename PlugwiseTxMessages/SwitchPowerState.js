@@ -10,6 +10,10 @@ var desiredStateValid = function(desiredState) {
     return desiredState === 0 || desiredState === 1;
 }
 
+var generateMessage = function(plugAddress, desiredState) {
+    return "0017" + plugAddress + (desiredState == 0 ? "00" : "01");
+}
+
 var SwitchPowerState = function(plugAddress, desiredState, callback) {
     if (!plugAddressValid(plugAddress)) {
         return callback('Invalid plug address specified');
@@ -43,8 +47,7 @@ var SwitchPowerState = function(plugAddress, desiredState, callback) {
     // };
 
     this.__proto__ = txMessageModel(
-        { type: 1 }
-        // { type: 0, message: "\x30\x30\x30\x41"},
+        { type: 1, message: generateMessage(plugAddress, desiredState) }
         // processMessages
     );
 } 
