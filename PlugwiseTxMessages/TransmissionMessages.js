@@ -1,3 +1,4 @@
 module.exports = {
-    Initialise: require('./Initialise')
+    Initialise: require('./Initialise'),
+    SwitchPower: require('./SwitchPowerState')
 }
