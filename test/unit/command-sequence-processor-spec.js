@@ -9,7 +9,7 @@ var assert = require('assert'),
 
     var getTransmissionMessage = function(txMsg) {
         return new TransmissionMessageModel(
-            {type: 1, message: "hello world"},
+            {type: 2, message: "hello world"},
             txMsg ? txMsg.callback === null ? null : sinon.spy() : sinon.spy()
         );
     };
