@@ -15,6 +15,8 @@ var generateMessage = function(plugAddress, desiredState) {
 }
 
 var SwitchPowerState = function(plugAddress, desiredState, callback) {
+    var genericErrorMessage = 'There was an error communicating with plug ' + plugAddress;
+
     if (!plugAddressValid(plugAddress)) {
         return callback('Invalid plug address specified');
     }
@@ -23,32 +25,26 @@ var SwitchPowerState = function(plugAddress, desiredState, callback) {
         return callback("Invalid desired state");
     }
 
-    // var processMessages = function(error, messages) {
-    //     if (error) {
-    //         return callback(error);
-    //     }
+    var processMessages = function(error, messages) {
+        console.log(messages);
+        if (error || !messages || (messages.length !== 1)) {
+            return callback(genericErrorMessage, null);
+        }
 
-    //     var networkData,
-    //         initResponses = messages.filter(function(message) {
-    //             return message.code === '0011' && message.parameters.length === 42;
-    //         });
+        if (!messages[0].isAck() && !messages[0].isNAck()) {
+            return callback(genericErrorMessage, null);
+        }
 
-    //     if (initResponses.length === 0) {
-    //         return callback('No valid Initialisation Response found.');
-    //     }
+        if (messages[0].isNAck()) {
+            return callback('The plug ' + plugAddress + ' is not responding', null);
+        }
 
-    //     networkData = {
-    //         network: initResponses[0].parameters.substring(0,10),
-    //         stick: initResponses[0].parameters.substring(10,16),
-    //         circlePlus: initResponses[0].parameters.substring(30,36)
-    //     }
-
-    //     callback(null, networkData);
-    // };
+        return callback(null, {plugAddress: plugAddress, state: desiredState});
+    };
 
     this.__proto__ = txMessageModel(
-        { type: 1, message: generateMessage(plugAddress, desiredState) }
-        // processMessages
+        { type: 1, message: generateMessage(plugAddress, desiredState) },
+        processMessages
     );
 } 
 
