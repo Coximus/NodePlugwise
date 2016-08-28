@@ -26,17 +26,15 @@ var SwitchPowerState = function(plugAddress, desiredState, callback) {
     }
 
     var processMessages = function(error, messages) {
-        console.log(messages);
+        if (error && error === "NACK receieved") {
+            return callback('The plug ' + plugAddress + ' is not responding', null);
+        }
         if (error || !messages || (messages.length !== 1)) {
             return callback(genericErrorMessage, null);
         }
 
-        if (!messages[0].isAck() && !messages[0].isNAck()) {
+        if (!messages[0].isAck()) {
             return callback(genericErrorMessage, null);
-        }
-
-        if (messages[0].isNAck()) {
-            return callback('The plug ' + plugAddress + ' is not responding', null);
         }
 
         return callback(null, {plugAddress: plugAddress, state: desiredState});

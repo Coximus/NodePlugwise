@@ -116,7 +116,7 @@ describe('PlugwiseTxMessage - SwitchPowerState', function() {
                     done();
                 });
 
-            msg.callback(null, receptions);
+            msg.callback("NACK receieved", null);
         });
     });
 

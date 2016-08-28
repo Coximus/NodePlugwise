@@ -43,6 +43,9 @@ describe('Plugwise', function() {
         if (Buffer.getInstance.restore) {
             Buffer.getInstance.restore();
         }
+        if (BufferProcessor.process.restore) {
+            BufferProcessor.process.restore();
+        }
         if (CommandSequenceProcessor.Process.restore) {
             CommandSequenceProcessor.Process.restore();
         };
