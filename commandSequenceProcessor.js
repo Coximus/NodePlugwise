@@ -1,6 +1,7 @@
 var typeResonseCountMap = {
     0: 1,
-    1: 2
+    1: 1,
+    2: 2
 };
 
 var NAckReceived = function(receptions) {
@@ -18,7 +19,9 @@ module.exports = {
         if (!commandSequence.transmission.callback){
             return;
         }
+
         var receptions = commandSequence.receptions;
+
         if (NAckReceived(commandSequence.receptions)) {
             return commandSequence.transmission.callback("NACK receieved");
         }
