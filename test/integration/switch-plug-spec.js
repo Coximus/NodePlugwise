@@ -127,7 +127,7 @@ describe('Plugwise - Switch Plug', function() {
             });
 
             buffer.store(PlugwiseAckMessageStringHelper());
-            buffer.store(PlugwiseAckMessageStringHelper());
+            buffer.store(PlugwiseMessageStringHelper({code: '0000', sequenceNumber: '0001', parameters: '00D8' + plugAddress}));
         });
     });
 });

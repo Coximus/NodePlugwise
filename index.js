@@ -121,7 +121,9 @@ Plugwise.prototype.getSerialPorts = function(callback) {
 // var test = new Plugwise();
 // test.connect('/dev/tty.usbserial-A700drEa', function() {
 //     console.log('my connected');
-//     test.switchPlug("000D6F0000768D95", 1);
+//     test.switchPlug("000D6F0000768D95", 0, function(error, response) {
+//         console.log(error, response);
+//     });
 // });
 
 module.exports = Plugwise;

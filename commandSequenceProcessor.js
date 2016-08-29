@@ -19,9 +19,9 @@ module.exports = {
         if (!commandSequence.transmission.callback){
             return;
         }
+
         var receptions = commandSequence.receptions;
-        // TODO : should callback with an error object with an error.type
-        // then anything consuming the error can compare on its type.
+
         if (NAckReceived(commandSequence.receptions)) {
             return commandSequence.transmission.callback("NACK receieved");
         }

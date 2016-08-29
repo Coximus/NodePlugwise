@@ -33,7 +33,22 @@ var SwitchPowerState = function(plugAddress, desiredState, callback) {
             return callback(genericErrorMessage, null);
         }
 
-        if (!messages[0].isAck()) {
+        if (messages[0].code !== '0000') {
+            return callback(genericErrorMessage, null);   
+        }
+
+        if (!messages[0].parameters || messages[0].parameters.length !== 20) {
+            return callback(genericErrorMessage, null);
+        }
+
+        var responseCode = messages[0].parameters.substring(0,4),
+            responseAddress = messages[0].parameters.substring(4);
+
+        if (responseCode !== '00D8' && responseCode !== '00DE') {
+            return callback(genericErrorMessage, null);
+        }
+
+        if (responseAddress !== plugAddress) {
             return callback(genericErrorMessage, null);
         }
 

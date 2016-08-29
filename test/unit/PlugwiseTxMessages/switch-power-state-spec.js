@@ -99,31 +99,56 @@ describe('PlugwiseTxMessage - SwitchPowerState', function() {
             var msg = gernerateMsgWithGenericError(done);
             msg.callback(null, ["reception1", "reception2"]);
         });
-        
-        it('should call the callback with a suitable error if the first is not an Ack or a NAcK', function(done) {
+
+        it('should call the callback with a suitable error if the first message does not have a code of 0000', function(done) {
             var invalidCode = '1234',
-                receptions = [new PlugwiseMessage({code: invalidCode, parameters: 'some-parameters'})],
+                receptions = [new PlugwiseMessage({code: invalidCode})],
                 msg = gernerateMsgWithGenericError(done);
 
             msg.callback(null, receptions);
         });
 
         it('should call the callback with a suitable error if the first message is a NAck', function(done) {
-            var NAck = new PlugwiseMessage({code: '0000', parameters: '00E1'});
-                receptions = [NAck],
-                msg = new SwitchPowerStateMsg(plugAddress, 0, function(error, response) {
+            var msg = new SwitchPowerStateMsg(plugAddress, 0, function(error, response) {
                     assert.equal('The plug ' + plugAddress + ' is not responding', error);
                     done();
                 });
 
             msg.callback("NACK receieved", null);
         });
+
+        it('should call the callback with a suitable error if the first message parameters length is not 20', function(done) {
+            var validCode = '0000',
+                invalidParameters = '1234567890123456789',
+                receptions = [new PlugwiseMessage({code: validCode, parameters: invalidParameters})],
+                msg = gernerateMsgWithGenericError(done);
+
+            msg.callback(null, receptions);
+        });
+
+        it('should call the callback with a suitable error if the first message parameters does not start with 00D8 or 00DE', function(done) {
+            var validCode = '0000',
+                invalidParameters = 'not--invalid--params',
+                receptions = [new PlugwiseMessage({code: validCode, parameters: invalidParameters})],
+                msg = gernerateMsgWithGenericError(done);
+
+            msg.callback(null, receptions);
+        });
+
+        it('should call the callback with a suitable error if the first message parameters does not end with the plug address', function(done) {
+            var validCode = '0000',
+                invalidParameters = '00D8not-plug-address',
+                receptions = [new PlugwiseMessage({code: validCode, parameters: invalidParameters})],
+                msg = gernerateMsgWithGenericError(done);
+
+            msg.callback(null, receptions);
+        });
     });
 
     describe('on success', function() {
         it('should call the callback with no error', function(done) {
-            var Ack = new PlugwiseMessage({code: '0000', parameters: '00C1'}),
-                receptions = [Ack],
+            var successMsg = new PlugwiseMessage({code: '0000', parameters: '00DE' + plugAddress}),
+                receptions = [successMsg],
                 msg = new SwitchPowerStateMsg(plugAddress, 0, function(error, response) {
                     assert.deepEqual(null, error);
                     done();
@@ -133,8 +158,8 @@ describe('PlugwiseTxMessage - SwitchPowerState', function() {
         });
 
         it('should call the callback with an object containing the plug address and new state', function(done) {
-            var Ack = new PlugwiseMessage({code: '0000', parameters: '00C1'}),
-                receptions = [Ack],
+            var successMsg = new PlugwiseMessage({code: '0000', parameters: '00DE' + plugAddress}),
+                receptions = [successMsg],
                 desiredState = 0,
                 desiredResponse = {plugAddress: plugAddress, state: desiredState},
                 msg = new SwitchPowerStateMsg(plugAddress, 0, function(error, response) {
