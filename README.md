@@ -5,7 +5,7 @@ A Node module to interact with Plugwise equipment
 
 via [npm (node package manager)](http://github.com/isaacs/npm)
 
-    $ npm install node-plugwise
+    $ npm install nodeplugwise
 
 ## Usage
 
