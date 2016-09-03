@@ -1,6 +1,6 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    Plugwise = require('../../index.js'),
+    Plugwise = require('../../Plugwise.js'),
     Serialport = require('serialport'),
     Buffer = require('../../buffer'),
     BufferProcessor = require('../../bufferProcessor'),
