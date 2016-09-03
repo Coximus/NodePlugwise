@@ -127,3 +127,4 @@ Plugwise.prototype.getSerialPorts = function(callback) {
 // });
 
 module.exports = Plugwise;
+module.exports.getInstance = function() { return new Plugwise() };
