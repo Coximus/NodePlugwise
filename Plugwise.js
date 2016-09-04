@@ -80,9 +80,12 @@ Plugwise.prototype.initialiseSerial = function() {
 };
 
 Plugwise.prototype.switchPlug = function(plugAddress, desiredState, callback) {
-    this.send(new TransmissionMessages.SwitchPower(plugAddress, desiredState, function(error, response) {
+    var txMessage = new TransmissionMessages.SwitchPower(plugAddress, desiredState, function(error, response) {
         callback(error, response);
-    }.bind(this)));
+    }.bind(this));
+    if (txMessage.message) {
+        this.send(txMessage);
+    }
 }
 
 Plugwise.prototype.recieveSerialData = function(data) {
@@ -117,14 +120,6 @@ Plugwise.prototype.getSerialPorts = function(callback) {
         return callback(validPorts);
     });
 };
-
-// var test = new Plugwise();
-// test.connect('/dev/tty.usbserial-A700drEa', function() {
-//     console.log('my connected');
-//     test.switchPlug("000D6F0000768D95", 0, function(error, response) {
-//         console.log(error, response);
-//     });
-// });
 
 module.exports = Plugwise;
 module.exports.getInstance = function() { return new Plugwise() };

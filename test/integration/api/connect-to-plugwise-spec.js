@@ -1,7 +1,7 @@
 var assert = require('assert'),
-    index = require('../../index.js'),
+    index = require('../../../index.js'),
     sinon = require('sinon'),
-    Plugwise = require('../../Plugwise');
+    Plugwise = require('../../../Plugwise');
 
 describe('Integration - Plugwise - Connect', function() {
 

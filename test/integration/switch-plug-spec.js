@@ -38,6 +38,22 @@ describe('Plugwise - Switch Plug', function() {
     });
 
     describe('Errors', function() {
+
+        it('should not send a message to the serial port if the plug address is malformed', function(done) {
+            var plugwise,
+                plugAddress = "invalid",
+                message = new transmissionMessages.SwitchPower(plugAddress, 0, function(error){
+                    assert(error);
+                    done();
+                });
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.switchPlug(plugAddress, 0, function(){});
+
+            assert.equal(0, plugwise.serialPort.write.callCount);
+        });
+
         it('should send the correct message to the serial port', function() {
             var plugwise,
                 plugAddress = "0123456789ABCDEF",
