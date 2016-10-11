@@ -33,10 +33,20 @@ var Plugwise = function() {
     this.commandsInFlight = [];
 };
 
+var notAcknowledgedCallback = function() {
+    if (this.txMsg) {
+        this.txMsg = null;
+    }
+};
+
 Plugwise.prototype.send = function(message) {
     if (!this.txMsg) {
         this.txMsg = message;
-        return this.serialPort.write(message.message);
+        this.serialPort.write(message.message);
+        if (message.startAckTimer) {
+            message.startAckTimer.bind(this)(notAcknowledgedCallback);
+        }
+        return;
     }
     
     this.txQueue.push(message);
@@ -57,6 +67,9 @@ Plugwise.prototype.processPlugwiseMessage = function(msg) {
     }
 
     if (plugwiseMsg.isAck()) {
+        if(this.txMsg && this.txMsg.clearAckTimer){
+            this.txMsg.clearAckTimer();
+        }
         commandSequence = new CommandSequence(this.txMsg);
         commandSequence.setSequenceNumber(plugwiseMsg.sequenceNo)
         this.commandsInFlight.push(commandSequence);

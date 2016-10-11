@@ -433,5 +433,59 @@ describe('Plugwise', function() {
                 assert.equal(messages[index].message, plugwise.serialPort.write.getCall(index).args[0]);
             });
         });
+
+        it('should start the acknowledgement timer for a message as it is sent', function() {
+            var plugwise,
+                buffer = new Buffer(),
+                message = new transmissionMessage({message: 'hello world'}),
+                timerSpy = sinon.spy(message, 'startAckTimer');
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.send(message);
+
+            assert.equal(1, timerSpy.callCount);
+        });
+
+        it('should remove the txMsg if not acknowledged before the ACK timeout', function(done) {
+            process.env.NODE_ENV = 'test';
+            var plugwise,
+                buffer = new Buffer(),
+                message = new transmissionMessage({message: 'not acked'});
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.send(message);
+
+            assert.notEqual(null, plugwise.txMsg);
+            setTimeout(function() {
+                assert.equal(null, plugwise.txMsg);
+                done();
+            },10);
+        });
+
+        it('should stop the ackTimer if an ack is recieved before the ack time out', function() {
+            process.env.NODE_ENV = 'test';
+            var plugwise,
+                buffer = new Buffer(),
+                message = new transmissionMessage({message: 'going to be acked'}),
+                clearTimerSpy = sinon.spy(message, 'clearAckTimer');
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.send(message);
+            buffer.store(PlugwiseAckMessageStringHelper());
+
+            assert.equal(1, clearTimerSpy.callCount);
+        });
     });
 });
