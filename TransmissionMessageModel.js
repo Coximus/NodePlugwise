@@ -1,9 +1,26 @@
 var CRC = require('crc');
 
+function getAckTimeout() {
+    return process.env.NODE_ENV === 'test' ? 0 : 1000;
+}
+
 function pad(input, size) {
     var s = input+"";
     while (s.length < size) s = "0" + s;
     return s;
+}
+
+function startAckTimer(callback) {
+    this.ackTimer = setTimeout(function() {
+        if (callback) {
+            callback.bind(this)();
+        }
+    }.bind(this), getAckTimeout());
+}
+
+function clearAckTimer() {
+    clearTimeout(this.ackTimer);
+    this.ackTimer = null;
 }
 
 var MessageModel = function(message, callback) {
@@ -16,6 +33,8 @@ var MessageModel = function(message, callback) {
         type: message.type === 0 ? 0 : message.type  || null,
         message: header + msg + crc  + footer,
         callback: callback || null,
+        startAckTimer: startAckTimer,
+        clearAckTimer: clearAckTimer
     }
 	
 }
