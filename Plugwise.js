@@ -44,7 +44,7 @@ Plugwise.prototype.send = function(message) {
         this.txMsg = message;
         this.serialPort.write(message.message);
         if (message.startAckTimer) {
-            message.startAckTimer.bind(this)(notAcknowledgedCallback, this);
+            message.startAckTimer.bind(this)(notAcknowledgedCallback);
         }
         return;
     }

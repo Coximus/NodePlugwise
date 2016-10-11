@@ -70,7 +70,7 @@ describe('Transmission Message Model', function() {
             }.bind(context));
         });
 
-        it.only('should not call the callback if the ack timer is cleared', function(done) {
+        it('should not call the callback if the ack timer is cleared', function(done) {
             process.env.NODE_ENV = 'test';
             var message = new MessageModel({message: 'hello world'}),
                 context = {key: 'value'},
@@ -83,7 +83,7 @@ describe('Transmission Message Model', function() {
             setTimeout(function() {
                 assert.equal(0, callback.callCount);
                 done();
-            }, 50);
+            }, 15);
         });
     });
 });
