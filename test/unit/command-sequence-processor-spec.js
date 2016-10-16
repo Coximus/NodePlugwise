@@ -51,6 +51,18 @@ var assert = require('assert'),
                 done(ex);
             }
         });
+
+        it('should stop the command sequence timer', function(){
+            var nackMessage = new PlugwiseMessageModel({code: "0000", sequenceNo: "0001", parameters: "00E1"}),
+                commandSequence = getCommandSequence();
+
+            sinon.spy(commandSequence, 'stopTimer');
+            acknowledgeCommandSequence(commandSequence);
+            commandSequence.addReception(nackMessage);
+            CommandSequenceProcessor.Process(commandSequence);
+
+            assert.equal(1, commandSequence.stopTimer.callCount);
+        });
     });
 
     describe('Recieving responses', function() {
@@ -69,6 +81,22 @@ var assert = require('assert'),
             assert(commandSequence.transmission.callback.called);
             assert.equal(2, commandSequence.transmission.callback.firstCall.args.length);
             assert.equal(null, commandSequence.transmission.callback.firstCall.args[0]);
+        });
+
+        it('should stop the command sequence timer when reaching the correct number of responses', function(){
+            var followupMessage = new PlugwiseMessageModel({code: "1234", sequenceNo: "0001", parameters: "SOME-PARAMETERS"}),
+                commandSequence = getCommandSequence();
+
+            sinon.spy(commandSequence, 'stopTimer');
+            acknowledgeCommandSequence(commandSequence);
+            CommandSequenceProcessor.Process(commandSequence);
+
+            assert(!commandSequence.transmission.callback.called);
+
+            commandSequence.addReception(followupMessage);
+            CommandSequenceProcessor.Process(commandSequence);
+
+            assert(commandSequence.stopTimer.called);
         });
 
         it('should not call the callback with when reaching the correct number of responses if no callback is specified', function(done) {
@@ -107,6 +135,22 @@ var assert = require('assert'),
 
             assert.equal(2, commandSequence.transmission.callback.callCount);
             assert.equal(1, commandSequence.transmission.callback.secondCall.args.length);
+        });
+
+        it('should stop the command sequence timer when recieving more messages than expected', function(){
+            var followupMessage = new PlugwiseMessageModel({code: "1234", sequenceNo: "0001", parameters: "SOME-PARAMETERS"});
+                commandSequence = getCommandSequence();
+
+            sinon.spy(commandSequence, 'stopTimer');
+            acknowledgeCommandSequence(commandSequence);
+
+            CommandSequenceProcessor.Process(commandSequence);
+            commandSequence.addReception(followupMessage);
+            CommandSequenceProcessor.Process(commandSequence);
+            commandSequence.addReception(followupMessage);
+            CommandSequenceProcessor.Process(commandSequence);
+
+            assert.equal(2, commandSequence.stopTimer.callCount);
         });
 
         it('should not call onError when recieving more messages than expected if no callback is specified', function(done) {

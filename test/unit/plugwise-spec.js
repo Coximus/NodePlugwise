@@ -487,5 +487,23 @@ describe('Plugwise', function() {
 
             assert.equal(1, clearTimerSpy.callCount);
         });
+
+        it('should start the command sequence timer when an ack is recieved', function(done) {
+            process.env.NODE_ENV = 'test';
+            var plugwise,
+                buffer = new Buffer(),
+                message = new transmissionMessage({message: 'should start a timer'},function(error, response){
+                    assert.equal(error, 'Message timed out');
+                    done();
+                });
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.send(message);
+            buffer.store(PlugwiseAckMessageStringHelper());
+        });
     });
 });

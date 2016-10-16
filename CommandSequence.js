@@ -16,6 +16,7 @@ CommandSequence.prototype.setSequenceNumber = function(seqNo) {
 };
 
 CommandSequence.prototype.addReception = function(message) {
+    this.resetTimer();
     this.receptions.push(message);
 };
 
@@ -28,9 +29,11 @@ CommandSequence.prototype.stopTimer = function() {
 };
 
 CommandSequence.prototype.resetTimer = function() {
-    var callback = this.timer._onTimeout;
+    var callback = this.timer && this.timer._onTimeout ? this.timer._onTimeout : null;
     clearTimeout(this.timer);
-    this.startTimer(callback);
+    if(callback) {
+        this.startTimer(callback);
+    }
 };
 
 module.exports = CommandSequence;

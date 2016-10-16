@@ -23,12 +23,15 @@ module.exports = {
         var receptions = commandSequence.receptions;
 
         if (NAckReceived(commandSequence.receptions)) {
+            commandSequence.stopTimer();
             return commandSequence.transmission.callback("NACK receieved");
         }
         if (receptions.length === typeResonseCountMap[commandSequence.transmission.type]) {
+            commandSequence.stopTimer();
             return commandSequence.transmission.callback(null, commandSequence.receptions);
         }
         if (receptions.length > typeResonseCountMap[commandSequence.transmission.type]) {
+            commandSequence.stopTimer();
             return commandSequence.transmission.callback("Too many messages were received");
         }
     }

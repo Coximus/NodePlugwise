@@ -139,5 +139,17 @@ describe('Command Sequence', function() {
                 done();
             }, 15);
         });
+
+        it('should reset its timer when recieving a message', function() {
+            var commandSequence = new CommandSequence(),
+                messages = [new PlugwiseMessageModel({code: "0000", sequenceNo: "0001", parameters: "00C1"}),
+                    new PlugwiseMessageModel({code: "0001", sequenceNo: "0001", parameters: "00C1"})];
+
+            sinon.spy(commandSequence, 'resetTimer');
+            messages.forEach(function(message, index) {
+                commandSequence.addReception(message);
+                assert.equal(index+1, commandSequence.resetTimer.callCount);
+            });
+        });
     });
 });

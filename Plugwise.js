@@ -39,6 +39,10 @@ var notAcknowledgedCallback = function() {
     }
 };
 
+var messageTimeoutCallback = function(commandSequence) {
+    return commandSequence.transmission.callback('Message timed out');
+};
+
 Plugwise.prototype.send = function(message) {
     if (!this.txMsg) {
         this.txMsg = message;
@@ -71,7 +75,10 @@ Plugwise.prototype.processPlugwiseMessage = function(msg) {
             this.txMsg.clearAckTimer();
         }
         commandSequence = new CommandSequence(this.txMsg);
-        commandSequence.setSequenceNumber(plugwiseMsg.sequenceNo)
+        commandSequence.setSequenceNumber(plugwiseMsg.sequenceNo);
+        if(this.txMsg && this.txMsg.callback) {
+            commandSequence.startTimer(messageTimeoutCallback);
+        }
         this.commandsInFlight.push(commandSequence);
         this.txMsg = null;
         if(this.txQueue.length > 0) {
