@@ -35,6 +35,9 @@ var Plugwise = function() {
 
 var notAcknowledgedCallback = function() {
     if (this.txMsg) {
+        if(this.txMsg.callback) {
+            this.txMsg.callback('The message was not acknowledged');
+        }
         this.txMsg = null;
     }
 };

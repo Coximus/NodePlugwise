@@ -470,6 +470,27 @@ describe('Plugwise', function() {
             },10);
         });
 
+        it('should call the message callback with an error if the ack timer times out', function(done) {
+            process.env.NODE_ENV = 'test';
+            var plugwise,
+                buffer = new Buffer(),
+                message = new transmissionMessage({message: 'not acked'}, sinon.spy());
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            stubSerialPort();
+            
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.send(message);
+
+            assert.notEqual(null, plugwise.txMsg);
+            setTimeout(function() {
+                assert(message.callback.called);
+                assert(message.callback.firstCall.args[0]);
+                done();
+            },10);
+        });
+
         it('should stop the ackTimer if an ack is recieved before the ack time out', function() {
             process.env.NODE_ENV = 'test';
             var plugwise,
