@@ -38,12 +38,10 @@ var Plugwise = function() {
 };
 
 var notAcknowledgedCallback = function() {
-    if (this.txMsg) {
-        if(this.txMsg.callback) {
-            this.txMsg.callback('The message was not acknowledged');
-        }
-        this.txMsg = null;
+    if (this.txMsg && this.txMsg.callback) {
+        this.txMsg.callback('The message was not acknowledged');
     }
+    this.txMsg = null;
 };
 
 var messageTimeoutCallback = function(commandSequence) {
@@ -54,9 +52,6 @@ Plugwise.prototype.send = function(message) {
     if (!this.txMsg) {
         this.txMsg = message;
         this.serialPort.write(message.message);
-        // if (message.startAckTimer) {
-        //     message.startAckTimer   (notAcknowledgedCallback);
-        // }
         message.ackTimer = setTimeout(notAcknowledgedCallback.bind(this), getAckTimeout());
         return;
     }
