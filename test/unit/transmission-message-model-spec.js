@@ -64,31 +64,5 @@ describe('Transmission Message Model', function() {
             
             assert.deepEqual(null, message.ackTimer);
         });
-        // it('should set a timeout when startAckTimer is called', function(done) {
-        //     process.env.NODE_ENV = 'test';
-        //     var message = new MessageModel({message: 'hello world'}),
-        //         context = {key: 'value'};
-
-        //     message.startAckTimer(function() {
-        //         assert.equal(this, context);
-        //         done();
-        //     }.bind(context));
-        // });
-
-        // it('should not call the callback if the ack timer is cleared', function(done) {
-        //     process.env.NODE_ENV = 'test';
-        //     var message = new MessageModel({message: 'hello world'}),
-        //         context = {key: 'value'},
-        //         callback = sinon.spy();
-
-
-        //     message.startAckTimer(callback);
-        //     message.clearAckTimer();
-
-        //     setTimeout(function() {
-        //         assert.equal(0, callback.callCount);
-        //         done();
-        //     }, 15);
-        // });
     });
 });
