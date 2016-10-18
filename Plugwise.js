@@ -5,6 +5,10 @@ var Serial = require('serialport'),
     CommandSequenceProcessor = require('./commandSequenceProcessor'),
     TransmissionMessages = require('./PlugwiseTxMessages/TransmissionMessages');
 
+function getAckTimeout() {
+    return process.env.NODE_ENV === 'test' ? 0 : 1000;
+}
+
 var getCommandSequenceBySequenceNumber = function(commandSequences, sequenceNo) {
     for(var i = 0; i < commandSequences.length; i++) {
         if (commandSequences[i].sequenceNumber === sequenceNo) {
@@ -50,9 +54,10 @@ Plugwise.prototype.send = function(message) {
     if (!this.txMsg) {
         this.txMsg = message;
         this.serialPort.write(message.message);
-        if (message.startAckTimer) {
-            message.startAckTimer.bind(this)(notAcknowledgedCallback);
-        }
+        // if (message.startAckTimer) {
+        //     message.startAckTimer   (notAcknowledgedCallback);
+        // }
+        message.ackTimer = setTimeout(notAcknowledgedCallback.bind(this), getAckTimeout());
         return;
     }
     
@@ -74,8 +79,9 @@ Plugwise.prototype.processPlugwiseMessage = function(msg) {
     }
 
     if (plugwiseMsg.isAck()) {
-        if(this.txMsg && this.txMsg.clearAckTimer){
-            this.txMsg.clearAckTimer();
+        if(this.txMsg){
+            clearTimeout(this.txMsg.ackTimer);
+            this.txMsg.ackTimer = null;
         }
         commandSequence = new CommandSequence(this.txMsg);
         commandSequence.setSequenceNumber(plugwiseMsg.sequenceNo);

@@ -437,8 +437,7 @@ describe('Plugwise', function() {
         it('should start the acknowledgement timer for a message as it is sent', function() {
             var plugwise,
                 buffer = new Buffer(),
-                message = new transmissionMessage({message: 'hello world'}),
-                timerSpy = sinon.spy(message, 'startAckTimer');
+                message = new transmissionMessage({message: 'hello world'});
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
@@ -447,7 +446,7 @@ describe('Plugwise', function() {
             plugwise.connect('port', function(){});
             plugwise.send(message);
 
-            assert.equal(1, timerSpy.callCount);
+            assert(message.ackTimer instanceof Object);
         });
 
         it('should remove the txMsg if not acknowledged before the ACK timeout', function(done) {
@@ -495,8 +494,7 @@ describe('Plugwise', function() {
             process.env.NODE_ENV = 'test';
             var plugwise,
                 buffer = new Buffer(),
-                message = new transmissionMessage({message: 'going to be acked'}),
-                clearTimerSpy = sinon.spy(message, 'clearAckTimer');
+                message = new transmissionMessage({message: 'going to be acked'});
 
             sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
             stubSerialPort();
@@ -506,7 +504,7 @@ describe('Plugwise', function() {
             plugwise.send(message);
             buffer.store(PlugwiseAckMessageStringHelper());
 
-            assert.equal(1, clearTimerSpy.callCount);
+            assert.deepEqual(null, message.ackTimer);
         });
 
         it('should start the command sequence timer when an ack is recieved', function(done) {

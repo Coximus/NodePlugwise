@@ -10,19 +10,6 @@ function pad(input, size) {
     return s;
 }
 
-function startAckTimer(callback) {
-    this.ackTimer = setTimeout(function() {
-        if (callback) {
-            callback.bind(this)();
-        }
-    }.bind(this), getAckTimeout());
-}
-
-function clearAckTimer() {
-    clearTimeout(this.ackTimer);
-    this.ackTimer = null;
-}
-
 var MessageModel = function(message, callback) {
     var msg = message.message || "",
         header = "\x05\x05\x03\x03",
@@ -33,8 +20,7 @@ var MessageModel = function(message, callback) {
         type: message.type === 0 ? 0 : message.type  || null,
         message: header + msg + crc  + footer,
         callback: callback || null,
-        startAckTimer: startAckTimer,
-        clearAckTimer: clearAckTimer
+        ackTimer: null
     }
 	
 }
