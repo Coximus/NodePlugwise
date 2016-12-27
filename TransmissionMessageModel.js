@@ -20,7 +20,8 @@ var MessageModel = function(message, callback) {
         type: message.type === 0 ? 0 : message.type  || null,
         message: header + msg + crc  + footer,
         callback: callback || null,
-        ackTimer: null
+        ackTimer: null,
+        calledBackTime: null
     }
 	
 }

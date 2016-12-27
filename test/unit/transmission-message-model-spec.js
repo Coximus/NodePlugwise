@@ -33,11 +33,8 @@ describe('Transmission Message Model', function() {
         var message = new MessageModel({});
 
         assert.deepEqual(null, message.type);
-        assert.notDeepEqual(undefined, message.type);
         assert.deepEqual(header+"0000"+footer, message.message);
-        assert.notDeepEqual(undefined, message.message);
         assert.deepEqual(null, message.callback);
-        assert.notDeepEqual(undefined, message.callback);
     });
 
     it('should add the header to the message', function() {

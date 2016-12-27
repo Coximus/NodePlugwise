@@ -26,6 +26,11 @@ var SwitchPowerState = function(plugAddress, desiredState, callback) {
     }
 
     var processMessages = function(error, messages) {
+        if(this.calledBackTime) {
+            return
+        }
+        this.calledBackTime = new Date();
+
         if (error && error === "NACK receieved") {
             return callback('The plug ' + plugAddress + ' is not responding', null);
         }

@@ -146,4 +146,25 @@ describe('Plugwise - Switch Plug', function() {
             buffer.store(PlugwiseMessageStringHelper({code: '0000', sequenceNumber: '0001', parameters: '00D8' + plugAddress}));
         });
     });
+
+    describe('Only callback onces', function() {
+        it('should only call the callback once', function() {
+            var plugwise,
+                buffer = new Buffer(),
+                plugAddress = "0123456789ABCDEF",
+                message = new transmissionMessages.SwitchPower(plugAddress, 0, null),
+                callback = sinon.spy(function(error, response) {});
+
+            sinon.stub(Buffer, 'getInstance', function() {return (buffer)});
+            plugwise = new Plugwise();
+            plugwise.connect('port', function(){});
+            plugwise.switchPlug(plugAddress, 0, callback);
+
+            buffer.store(PlugwiseAckMessageStringHelper());
+            buffer.store(PlugwiseNAckMessageStringHelper());
+            buffer.store(PlugwiseMessageStringHelper({code: '0000', sequenceNumber: '0001', parameters: '00D8' + plugAddress}));
+            
+            assert.equal(1, callback.callCount);
+        });
+    });
 });
